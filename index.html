@@ -14,9 +14,126 @@
 <script src="dist/js/classList.min.js"></script>
 <![endif]-->
 
-<body>
+<span>Origem:</span>
+<select name="origem" id="origem">
+	<option value="Bauru" selected>Bauru</option>
+	<option value="Londrina" disabled>Londrina</option>
+	<option value="Marilia">Marília</option>
+	<option value="Presidente Prudente">Presidente Prudente</option>
+</select>
 
+<span>Destino:</span>
+<select name="destino" id="destino">
+	<option value="Bauru" disabled>Bauru</option>
+	<option value="Londrina" selected>Londrina</option>
+	<option value="Marilia">Marília</option>
+	<option value="Presidente Prudente">Presidente Prudente</option>
+</select>
 
+<span>Peso:</span>
+<input id="peso" type="text" name="peso"/>
+
+<input id="calcular" type="submit" value="Calcular"/>
+
+<br>
+<span id="previsao">Frete: -</span><br>
+<span id="valor">Valor: -</span>
+
+<script>
+
+	// desabilita cidade no destino quando for selecionada na origem
+	document.getElementById('origem').addEventListener('change', function () {
+		// oIdx = origem index - dEl = destino element
+		var oIdx = document.getElementById('origem').selectedIndex;
+		var dEl = document.getElementById('destino');
+
+		for (var no in dEl) {
+			if(dEl.hasOwnProperty(no)) {
+				if(no == oIdx) {
+					if (dEl[oIdx].selected == true) {
+						dEl[oIdx].selected = false;
+						(!dEl[oIdx + 1]) ? dEl[0].selected = true : dEl[oIdx + 1].selected = true;
+					}
+					dEl[no].disabled = true;
+				} else {
+					dEl[no].disabled = false;
+				}
+			}
+		}
+
+	});
+
+	// desabilita cidade na origem quando for selecionada no destino
+	document.getElementById('destino').addEventListener('change', function () {
+		// dIdx = destino index - oEl = origem element
+		var dIdx = document.getElementById('destino').selectedIndex;
+		var oEl = document.getElementById('origem');
+
+		for (var no in oEl) {
+			if(oEl.hasOwnProperty(no)) {
+				if(no == dIdx) {
+					if (oEl[dIdx].selected == true) {
+						oEl[dIdx].selected = false;
+						(!oEl[dIdx + 1]) ? oEl[0].selected = true : oEl[dIdx + 1].selected = true;
+					}
+					oEl[no].disabled = true;
+				} else {
+					oEl[no].disabled = false;
+				}
+			}
+		}
+	});
+
+	// distancia em km (distância aproximada por rodovias)
+	var distancias = {
+		"Bauru > Londrina": 286,
+		"Bauru > Marilia": 107,
+		"Bauru > Presidente Prudente": 280,
+		"Londrina > Bauru": 309,
+		"Londrina > Marilia": 203,
+		"Londrina > Presidente Prudente": 166,
+		"Marilia > Bauru": 109,
+		"Marilia > Londrina": 205,
+		"Marilia > Presidente Prudente": 176,
+		"Presidente Prudente > Bauru": 282,
+		"Presidente Prudente > Londrina": 162,
+		"Presidente Prudente > Marilia": 176
+	};
+
+	// manunteção/pedágios/etc ignorados
+	document.getElementById('calcular').addEventListener('click', function (){
+		var peso = document.getElementById('peso').value;
+
+		if (!peso || !isFinite(peso) || isNaN(peso) || !parseFloat(peso)) {
+			document.getElementById('peso').focus();
+			alert('Digite um valor válido para o peso');
+		} else {
+			var origem = document.getElementById('origem').value;
+			var destino = document.getElementById('destino').value;
+
+			var rotaSelec = origem + ' > ' + destino;
+
+			// percorre o objeto distâncias até encontrar a rota igual à selecionada
+			for (var rota in distancias) {
+				if(distancias.hasOwnProperty(rota)) {
+					if (rotaSelec == rota) {
+
+						// autonomia 1Km/L e gasolina R$3, carga diretamente proporcional
+						var taxalucro = 500;
+						var frete = distancias[rota] * 3 + (peso * 0.4) + taxalucro;
+						var dias = 3;
+
+						(distancias[rota] / 2 > 120) ? dias++ : dias = 3;
+
+						document.getElementById('previsao').innerHTML = 'Frete: ~' + dias + ' dias úteis';
+						document.getElementById('valor').innerHTML = 'Valor: R$ ' + frete;
+					}
+				}
+			}
+		}
+	});
+
+</script>
 
 </body>
 
